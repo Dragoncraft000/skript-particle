@@ -1,6 +1,5 @@
 package com.sovdee.skriptparticles.util;
 
-import ch.njol.skript.util.Direction;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -12,11 +11,11 @@ import org.jetbrains.annotations.Contract;
  * If the location is created with a location, it will update to the location
  * If the location has a direction, it will apply the direction to the location when getLocation() is called
  */
+@SuppressWarnings("unused")
 public class DynamicLocation {
 
     private @Nullable Entity entity;
     private @Nullable Location location;
-    private @Nullable Direction direction;
 
     /**
      * Creates a dynamic location with the given entity
@@ -35,32 +34,11 @@ public class DynamicLocation {
     }
 
     /**
-     * Creates a dynamic location with the given location and direction
-     * @param location the location to create the dynamic location from
-     * @param direction the direction to create the dynamic location from
-     */
-    public DynamicLocation(Location location, @Nullable Direction direction) {
-        this.location = location.clone();
-        this.direction = direction;
-    }
-
-    /**
-     * Creates a dynamic location with the given entity and direction
-     * @param entity the entity to create the dynamic location from
-     * @param direction the direction to create the dynamic location from
-     */
-    public DynamicLocation(Entity entity, @Nullable Direction direction) {
-        this.entity = entity;
-        this.direction = direction;
-    }
-
-    /**
-     * Creates a dynamic location with the given dynamic location. This will copy any {@link Location}, but not the {@link Entity} or {@link Direction}.
+     * Creates a dynamic location with the given dynamic location. This will copy any {@link Location}, but not the {@link Entity}.
      * @param dynamicLocation the dynamic location to create the dynamic location from.
      */
     public DynamicLocation(DynamicLocation dynamicLocation) {
         this.entity = dynamicLocation.getEntity();
-        this.direction = dynamicLocation.getDirection();
         this.location = dynamicLocation.getLocation();
     }
 
@@ -71,7 +49,6 @@ public class DynamicLocation {
     public DynamicLocation() {
         this.location = null;
         this.entity = null;
-        this.direction = null;
     }
 
     /**
@@ -103,9 +80,6 @@ public class DynamicLocation {
 
         if (entity != null)
             location = entity.getLocation();
-
-        if (direction != null && location != null)
-            location = direction.getRelative(location);
 
         return (location == null) ? new Location(null, 0, 0, 0) : location.clone();
     }
@@ -141,26 +115,6 @@ public class DynamicLocation {
         this.entity = entity;
         this.location = null;
     }
-
-    /**
-     * Gets the current direction of the dynamic location, or null if it is not set.
-     *
-     * @return the current direction of the dynamic location
-     */
-    @Nullable
-    public Direction getDirection() {
-        return direction;
-    }
-
-    /**
-     * Sets the direction of the dynamic location.
-     *
-     * @param direction the direction to set the dynamic location to
-     */
-    public void setDirection(Direction direction) {
-        this.direction = direction;
-    }
-
     /**
      * Checks if the dynamic location is dynamic (tracking a moving entity).
      *
@@ -171,7 +125,7 @@ public class DynamicLocation {
     }
 
     /**
-     * Clones the dynamic location. This will copy any {@link Location}, but not the {@link Entity} or {@link Direction}.
+     * Clones the dynamic location. This will copy any {@link Location}, but not the {@link Entity}.
      * @return the cloned dynamic location
      */
     @Contract(value = " -> new", pure = true)
@@ -185,12 +139,7 @@ public class DynamicLocation {
             return false;
         boolean matchingEntity = entity != null && dynamicLocation.entity != null && entity.equals(dynamicLocation.entity);
         boolean matchingLocation = location != null && dynamicLocation.location != null && location.equals(dynamicLocation.location);
-        boolean matchingDirection = direction != null && dynamicLocation.direction != null && direction.equals(dynamicLocation.direction);
-        if (matchingEntity || matchingLocation) {
-            return matchingDirection || (direction == null && dynamicLocation.direction == null);
-        } else {
-            return false;
-        }
+        return matchingEntity || matchingLocation;
     }
 
     @Override

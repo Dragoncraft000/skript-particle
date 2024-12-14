@@ -5,5 +5,5 @@ description: Create complex effects with particles
 version: @version@
 api-version: 1.17
 main: com.sovdee.skriptparticles.SkriptParticle
-depend: [Skript]
+depend: []
 softdepend: [SkBee]

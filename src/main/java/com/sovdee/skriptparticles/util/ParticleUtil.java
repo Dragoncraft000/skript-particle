@@ -1,16 +1,11 @@
 package com.sovdee.skriptparticles.util;
 
-import ch.njol.skript.Skript;
-import ch.njol.skript.aliases.ItemType;
-import ch.njol.util.StringUtils;
 import com.destroystokyo.paper.ParticleBuilder;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Particle.DustOptions;
 import org.bukkit.Particle.DustTransition;
-import org.bukkit.Registry;
 import org.bukkit.Vibration;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
@@ -19,60 +14,47 @@ import org.bukkit.util.Vector;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /*
  * Thanks to ShaneBee at SkBee for the original code.
  */
+@SuppressWarnings("unused")
 public class ParticleUtil {
 
     private static final Map<String, Particle> PARTICLES = new HashMap<>();
     private static final Map<Particle, String> PARTICLE_NAMES = new HashMap<>();
-    private static final ParticleBuilder Y_AXIS = new ParticleBuilder(Particle.REDSTONE).data(new DustOptions(DyeColor.LIME.getColor(), 0.5f));
-    private static final ParticleBuilder X_AXIS = new ParticleBuilder(Particle.REDSTONE).data(new DustOptions(DyeColor.RED.getColor(), 0.5f));
-    private static final ParticleBuilder Z_AXIS = new ParticleBuilder(Particle.REDSTONE).data(new DustOptions(DyeColor.BLUE.getColor(), 0.5f));
+    private static final ParticleBuilder Y_AXIS = new ParticleBuilder(Particle.DUST).data(new DustOptions(DyeColor.LIME.getColor(), 0.5f));
+    private static final ParticleBuilder X_AXIS = new ParticleBuilder(Particle.DUST).data(new DustOptions(DyeColor.RED.getColor(), 0.5f));
+    private static final ParticleBuilder Z_AXIS = new ParticleBuilder(Particle.DUST).data(new DustOptions(DyeColor.BLUE.getColor(), 0.5f));
 
     // Load and map Minecraft particle names
     // Bukkit does not have any API for getting the Minecraft names of particles (how stupid)
     // This method fetches them from the server and maps them with the Bukkit particle enums
     static {
         // Added in Spigot 1.20.2 (oct 20/2023)
-        if (Skript.methodExists(Particle.class, "getKey")) {
-            Registry.PARTICLE_TYPE.forEach(particle -> {
-                String key = particle.getKey().getKey();
-                PARTICLES.put(key, particle);
-                PARTICLE_NAMES.put(particle, key);
-            });
-        } else {
-            // Load and map Minecraft particle names
-            // Prior to 1.20.2, Bukkit does not have any API for getting the Minecraft names of particles (how stupid)
-            // This method fetches them from the server and maps them with the Bukkit particle enums
-            @Nullable Class<?> cbParticle = ReflectionUtils.getOBCClass("CraftParticle");
-            try {
-                assert cbParticle != null;
-                Field bukkitParticleField = cbParticle.getDeclaredField("bukkit");
-                bukkitParticleField.setAccessible(true);
-                Field mcKeyField = cbParticle.getDeclaredField("minecraftKey");
-                mcKeyField.setAccessible(true);
+        // Load and map Minecraft particle names
+        // Prior to 1.20.2, Bukkit does not have any API for getting the Minecraft names of particles (how stupid)
+        // This method fetches them from the server and maps them with the Bukkit particle enums
+        @Nullable Class<?> cbParticle = ReflectionUtils.getOBCClass("CraftParticle");
+        try {
+            assert cbParticle != null;
+            Field bukkitParticleField = cbParticle.getDeclaredField("bukkit");
+            bukkitParticleField.setAccessible(true);
+            Field mcKeyField = cbParticle.getDeclaredField("minecraftKey");
+            mcKeyField.setAccessible(true);
 
-                for (Object enumConstant : cbParticle.getEnumConstants()) {
-                    String mcKey = mcKeyField.get(enumConstant).toString().replace("minecraft:", "");
-                    Particle bukkitParticle = (Particle) bukkitParticleField.get(enumConstant);
+            for (Object enumConstant : cbParticle.getEnumConstants()) {
+                String mcKey = mcKeyField.get(enumConstant).toString().replace("minecraft:", "");
+                Particle bukkitParticle = (Particle) bukkitParticleField.get(enumConstant);
 
-                    if (!bukkitParticle.toString().contains("LEGACY")) {
-                        PARTICLES.put(mcKey, bukkitParticle);
-                        PARTICLE_NAMES.put(bukkitParticle, mcKey);
-                    }
+                if (!bukkitParticle.toString().contains("LEGACY")) {
+                    PARTICLES.put(mcKey, bukkitParticle);
+                    PARTICLE_NAMES.put(bukkitParticle, mcKey);
                 }
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                e.printStackTrace();
             }
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
         }
     }
 
@@ -96,7 +78,7 @@ public class ParticleUtil {
             names.add(name);
         });
         Collections.sort(names);
-        return StringUtils.join(names, ", ");
+        return String.join(", ", names);
     }
 
     /**
@@ -162,8 +144,6 @@ public class ParticleUtil {
             return number.floatValue();
         } else if (dataType == Integer.class && data instanceof Number number) {
             return number.intValue();
-        } else if (dataType == ItemStack.class && data instanceof ItemType itemType) {
-            return itemType.getRandom();
         } else if (dataType == DustOptions.class && data instanceof DustOptions) {
             return data;
         } else if (dataType == DustTransition.class && data instanceof DustTransition) {
@@ -173,11 +153,6 @@ public class ParticleUtil {
         } else if (dataType == BlockData.class) {
             if (data instanceof BlockData) {
                 return data;
-            } else if (data instanceof ItemType itemType) {
-                Material material = itemType.getMaterial();
-                if (material.isBlock()) {
-                    return material.createBlockData();
-                }
             }
         }
         return null;

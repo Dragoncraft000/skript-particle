@@ -1,6 +1,6 @@
 package com.sovdee.skriptparticles.shapes;
 
-import ch.njol.skript.Skript;
+import com.sovdee.skriptparticles.SkriptParticle;
 import com.sovdee.skriptparticles.particles.Particle;
 import com.sovdee.skriptparticles.particles.ParticleGradient;
 import com.sovdee.skriptparticles.util.DynamicLocation;
@@ -158,18 +158,19 @@ public abstract class AbstractShape implements Shape {
                                 finalParticle.spawn(point);
                         }
                     } catch (IllegalArgumentException e) {
-                        Skript.error("Failed to spawn particle! Error: " + e.getMessage());
+                        SkriptParticle.warning("Failed to spawn particle! Error: " + e.getMessage());
                     }
                 }
             };
-            runnable.runTaskTimerAsynchronously(Skript.getInstance(), 0, 1);
+            assert SkriptParticle.getInstance() != null;
+            runnable.runTaskTimerAsynchronously(SkriptParticle.getInstance(), 0, 1);
         } else {
             // no animation needed, draw all particles at once
             for (Vector point :toDraw) {
                 try {
                     particle.spawn(point);
                 } catch (IllegalArgumentException e) {
-                    Skript.error("Failed to spawn particle! Error: " + e.getMessage());
+                    SkriptParticle.warning("Failed to spawn particle! Error: " + e.getMessage());
                     return;
                 }
             }

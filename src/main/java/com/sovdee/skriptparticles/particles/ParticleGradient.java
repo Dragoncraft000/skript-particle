@@ -1,6 +1,5 @@
 package com.sovdee.skriptparticles.particles;
 
-import ch.njol.skript.util.ColorRGB;
 import com.sovdee.skriptparticles.util.Quaternion;
 import org.bukkit.Color;
 import org.bukkit.util.Vector;
@@ -8,6 +7,7 @@ import org.bukkit.util.Vector;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class ParticleGradient {
 
     private final Quaternion orientation = new Quaternion(1, 0, 0, 0);
@@ -82,10 +82,6 @@ public class ParticleGradient {
             this.color = color;
         }
 
-        public Point(Vector position, ColorRGB color) {
-            this.position = position;
-            this.color = color.asBukkitColor();
-        }
 
         public Vector getPosition() {
             return position;

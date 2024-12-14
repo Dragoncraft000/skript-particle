@@ -1,21 +1,14 @@
 package com.sovdee.skriptparticles;
 
-import ch.njol.skript.Skript;
-import ch.njol.skript.SkriptAddon;
-import ch.njol.skript.bstats.bukkit.Metrics;
-import ch.njol.skript.util.Version;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.util.logging.Logger;
 
+@SuppressWarnings("unused")
 public class SkriptParticle extends JavaPlugin {
 
     private static SkriptParticle instance;
-    private static SkriptAddon addon;
     private static Logger logger;
 
 
@@ -32,11 +25,6 @@ public class SkriptParticle extends JavaPlugin {
     @Nullable
     public static SkriptParticle getInstance() {
         return instance;
-    }
-
-    @Nullable
-    public static SkriptAddon getAddonInstance() {
-        return addon;
     }
 
     public static void info(String message) {
@@ -57,45 +45,16 @@ public class SkriptParticle extends JavaPlugin {
         logger.severe(message);
     }
 
-    public static void debug(String message) {
-        if (logger == null)
-            return;
-        if (Skript.debug()) {
-            logger.info(message);
-        }
-    }
-
     @Override
     public void onEnable() {
-        final PluginManager manager = this.getServer().getPluginManager();
-        final Plugin skript = manager.getPlugin("Skript");
-        logger = this.getLogger();
-        if (skript == null || !skript.isEnabled()) {
-            SkriptParticle.severe("Could not find Skript! Make sure you have it installed and that it properly loaded. Disabling...");
-            manager.disablePlugin(this);
-            return;
-        } else if (Skript.getVersion().compareTo(new Version(2, 7, 0)) < 0) {
-            SkriptParticle.severe("You are running an unsupported version of Skript. Please update to at least Skript 2.7.0. Disabling...");
-            manager.disablePlugin(this);
-            return;
-        }
         instance = this;
-        addon = Skript.registerAddon(this);
-        addon.setLanguageFileDirectory("lang");
-        try {
-            addon.loadClasses("com.sovdee.skriptparticles");
-        } catch (IOException error) {
-            error.printStackTrace();
-            manager.disablePlugin(this);
-            return;
-        }
-        new Metrics(this, 18457);
+        logger = this.getLogger();
+        instance = this;
         SkriptParticle.info("Successfully enabled skript-particle.");
     }
 
     @Override
     public void onDisable() {
         instance = null;
-        addon = null;
     }
 }
